@@ -1,7 +1,12 @@
-const errorHandler = (error, req, res, next) => {
-    // Logging the error here
-    console.log(error); 
-    // Returning the status and error message to client
-    res.status(400).send(error.message); 
+function errorHandler(err, req, res, next) {
+
+    // Send the error message as the response
+    res.json({
+        valid: false,
+        status: err.status,
+        message: err.message,
+        stackTrash: err.stackTrash      
+    });
 }
+
 module.exports = errorHandler;

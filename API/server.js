@@ -9,10 +9,17 @@ const connectDb = require('./config/dbConnection')
 
 connectDb()
 app.use(express.json())
-app.use(errorHandler)
+
 
 app.use('/api/user/', userRoutes)
 app.use('/api/caterory/', categoryRoutes)
+
+app.get('/api/product', (req, res, next) => {
+    // Simulate an error
+    next(new Error("This is a simulated error."));
+});
+
+app.use(errorHandler)
 
 const PORT = process.env.PORT ? process.env.PORT : '5000'
 
