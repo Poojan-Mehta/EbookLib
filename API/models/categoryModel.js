@@ -9,6 +9,7 @@ const caterogySchema = new mongoose.Schema({
         type: String,
         required: [true, "Category description is mendatory."]
     }
+
 },
 {
     timestamps: true

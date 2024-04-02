@@ -15,10 +15,10 @@ const getUserInfo = async(req, res) => {
 
 const createNewUser = expressHandler(async (req, res) => {
     
-    const { name, email, contact } = req.body    
+    const { name, email, contact, password } = req.body    
 
     const user = await User.create({
-        name, email, contact
+        name, email, contact, password
     })
     res.status(200).json({message: "User added succssfully", data: user})
     
@@ -50,4 +50,49 @@ const deleteUser = async(req, res) => {
     res.status(200).json({message: "User deleted successfully...", data: deleteUser})
 }
 
-module.exports = { getAllUsers, getUserInfo, createNewUser, updateUserInfo, deleteUser}
+const generateAccessAndRefereshTokens = async(userId) =>{
+    try{
+        const user = await User.findById(userId);
+        const accessToken = await user.generateAccessToken()
+        const refreshToken = await user.generateRefreshToken()
+
+        //save token in db
+        user.refreshToken = refreshToken
+        await user.save();
+
+        return { accessToken, refreshToken }
+    }catch(err){
+        throw new Error(err)
+    }
+}
+
+const loginUser = async(req, res) => {
+    //get email password
+    const { email, password } = req.body
+
+    // Find the user by email
+    const user = await User.findOne({ email });
+
+    //convert and check in jwt
+    const isPasswordCorrect = await user.isPasswordCorrect(password)
+    if(!isPasswordCorrect){
+        res.status(404)
+        throw new Error("Invalid email or password")
+    }
+
+    //generate accesstoken and also save in db
+    const {accessToken, refreshToken} = await generateAccessAndRefereshTokens(user._id)
+    
+    //get the logged in user
+    const loggedInUser = await User.findById(user._id).select('-password -refreshToken')    
+
+    return res
+    .status(200)
+    .json({
+        message: "User loggedin successfully",
+        data: accessToken, refreshToken, loggedInUser
+    })
+
+}
+
+module.exports = { getAllUsers, getUserInfo, createNewUser, updateUserInfo, deleteUser, loginUser}

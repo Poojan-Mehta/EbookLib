@@ -3,6 +3,7 @@ const dotenv = require('dotenv').config()
 const app = express()
 const userRoutes = require('./routes/userRoutes')
 const categoryRoutes = require('./routes/categoryRoutes')
+const productRoutes = require('./routes/productRoutes')
 const errorHandler = require('./middleware/errorHandler')
 
 const connectDb = require('./config/dbConnection')
@@ -10,14 +11,10 @@ const connectDb = require('./config/dbConnection')
 connectDb()
 app.use(express.json())
 
-
 app.use('/api/user/', userRoutes)
 app.use('/api/caterory/', categoryRoutes)
 
-app.get('/api/product', (req, res, next) => {
-    // Simulate an error
-    next(new Error("This is a simulated error."));
-});
+app.use('/api/product/', productRoutes);
 
 app.use(errorHandler)
 
