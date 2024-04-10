@@ -4,6 +4,7 @@ const app = express()
 const userRoutes = require('./routes/userRoutes')
 const categoryRoutes = require('./routes/categoryRoutes')
 const productRoutes = require('./routes/productRoutes')
+const cartRoutes = require('./routes/cartRoutes')
 const errorHandler = require('./middleware/errorHandler')
 
 const connectDb = require('./config/dbConnection')
@@ -15,6 +16,7 @@ app.use('/api/user/', userRoutes)
 app.use('/api/caterory/', categoryRoutes)
 
 app.use('/api/product/', productRoutes);
+app.use('/api/cart/', cartRoutes);
 
 app.use(errorHandler)
 

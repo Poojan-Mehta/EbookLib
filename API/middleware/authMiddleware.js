@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken")
+const User = require("../models/userModel")
 
 const checkAuthentication = async (req, res, next) => {
     try {
@@ -9,10 +10,22 @@ const checkAuthentication = async (req, res, next) => {
             return res.status(401).json({ error: "Invalid credentials" });
         }
         //verify jwt token
-        const verifyToken = await jwt.verify(token, process.env.ACCESS_TOKEN)        
+        const verifyToken = await jwt.verify(token, process.env.ACCESS_TOKEN)  
+        if(!verifyToken){
+            //error
+        }
+
+        const user = await User.findById(verifyToken._id).select('-password -refreshToken')
+        req.user = user
+        //fetch user data and in req add user data
         next()
     } catch (error) {
-        return res.status(401).json({ error: "Access token has expired" });
+        if (error.message === 'jwt expired') {
+            return res.status(401).json({ error: "Access token has expired" });
+        } else {
+            console.log(error);
+            return res.status(401).json({ error: "Token verification failed" });
+        }
     }
 }
 

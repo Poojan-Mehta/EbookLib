@@ -1,5 +1,6 @@
 const User = require('../models/userModel')
 const expressHandler = require('express-async-handler')
+const jwt = require("jsonwebtoken")
 
 const getAllUsers = async (req, res) => {
 
@@ -66,6 +67,24 @@ const generateAccessAndRefereshTokens = async(userId) =>{
     }
 }
 
+const generateAccessAndRefereshTokensWhenExpire = async(req, res) =>{
+    try{        
+        const refreshTokenCurrent = req.body.refreshToken;
+        //verify token
+        const verifyToken = jwt.verify(refreshTokenCurrent, process.env.REFRESH_TOKEN)
+        if(!verifyToken){
+            throw new Error("AccessToken expired, please login again")
+        }
+        const userId = verifyToken._id;
+
+        // Generate new access and refresh tokens
+        const tokens = await generateAccessAndRefereshTokens(userId);
+        res.status(200).json({message: "successfully generated access and refreshToken", data: tokens})
+    }catch(err){
+        throw new Error(err)
+    }
+}
+
 const loginUser = async(req, res) => {
     //get email password
     const { email, password } = req.body
@@ -95,4 +114,4 @@ const loginUser = async(req, res) => {
 
 }
 
-module.exports = { getAllUsers, getUserInfo, createNewUser, updateUserInfo, deleteUser, loginUser}
+module.exports = { getAllUsers, getUserInfo, createNewUser, updateUserInfo, deleteUser, loginUser, generateAccessAndRefereshTokensWhenExpire}
